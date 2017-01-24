@@ -35,3 +35,42 @@ int main() {
     cout << pvec[0].ID;
     return 0;
 }
+
+bool cmp(int th, int tm, int ts, int h, int m, int s) {
+    if(th > h) {
+        return true;
+    } else if(tm > m) {
+        return true;
+    } else if(ts > s) {
+        return true;
+    }
+    return false;
+}
+//the following one is also good and save time
+//int main() {
+//    int n;
+//    scanf("%d", &n);
+//    string unlocked, locked;
+//    int unlockedh = 23, unlockedm = 59, unlockeds = 59;
+//    int lockedh = 0, lockedm = 0, lockeds = 0;
+//    for(int i = 0; i < n; i++) {
+//        string t;
+//        cin >> t;
+//        int h1, m1, s1, h2, m2, s2;
+//        scanf("%d:%d:%d %d:%d:%d", &h1, &m1, &s1, &h2, &m2, &s2);
+//        if(cmp(h1, m1, s1, unlockedh, unlockedm, unlockeds) == false) {
+//            unlockedh = h1;
+//            unlockedm = m1;
+//            unlockeds = s1;
+//            unlocked = t;
+//        }
+//        if(cmp(h2, m2, s2, lockedh, lockedm, lockeds) == true) {
+//            lockedh = h2;
+//            lockedm = m2;
+//            lockeds = s2;
+//            locked = t;
+//        }
+//    }
+//    cout << unlocked << " " << locked;
+//    return 0;
+//}
