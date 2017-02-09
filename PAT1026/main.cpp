@@ -10,129 +10,203 @@ struct custom{
     int hhs, mms, sss;
     int arrivingtimes;
     int playingtime;
+    int servetimes;
     int waitingtime = 0;
     int vip;
-    bool canbeserved = true;
 };
 
 struct table{
-    int hh = 8, mm = 0, ss = 0;
+    int finishtime = 8 * 3600;
     int servednum = 0;
     bool isviptable = false;
-    bool isempty = true;
-    custom cust;
 };
 
 int num;
 int k, m;
-int chh = 8, cmm = 0, css = 0;
+int normaltablemin = -1, viptablemin = -1;
+int normalfinishtimemin = 24 * 3600, vipfinishtimemin = 24 * 3600;
+
 vector<custom> qvec;
+vector<table> vect;
+vector<custom> vecc;
+vector<custom> vecout;
 bool sorta(const custom &a, const custom &b){
-    return a.hh * 3600 + a.mm *60 + a.ss <
-            b.hh * 3600 + b.mm *60 + b.ss;
+    return a.arrivingtimes < b.arrivingtimes;
 }
 
+void findmintable(){
+    normalfinishtimemin = 24 * 3600, vipfinishtimemin = 24 * 3600;
+    for (int i = 0; i < vect.size(); ++i) {
+        if(vect[i].finishtime < normalfinishtimemin && !vect[i].isviptable){
+            normalfinishtimemin = vect[i].finishtime;
+            normaltablemin = i;
+        }
+        if(vect[i].finishtime < vipfinishtimemin && vect[i].isviptable){
+            vipfinishtimemin = vect[i].finishtime;
+            viptablemin = i;
+        }
+    }
+//    cout << "nt:" << normalfinishtimemin << " nn:" << normaltablemin << " vt:" << vipfinishtimemin << " vn:" << viptablemin << endl;
+};
+
 int main() {
-    freopen("/home/yyj/Code/PAT-AdvancedLevel/PAT1026/in1026", "r", stdin);
+    freopen("/home/yyj/Code/PAT-AdvancedLevel/PAT1026/in1026a", "r", stdin);
     scanf("%d\n", &num);
-    vector<custom> vecc;
     for (int i = 0; i < num; ++i) {
         custom tmpc;
         scanf("%d:%d:%d %d %d\n", &tmpc.hh, &tmpc.mm, &tmpc.ss, &tmpc.playingtime, &tmpc.vip);
         tmpc.arrivingtimes = tmpc.hh * 3600 + tmpc.mm *60 + tmpc.ss;
+        if(tmpc.playingtime > 120)
+            tmpc.playingtime = 120;
+        if(tmpc.hh >= 21 || tmpc.hh < 8)
+            continue;
         vecc.push_back(tmpc);
     }
     scanf("%d %d\n", &k, &m);
-    vector<table> vect(k);
+    vect.resize(k);
     for (int i = 0; i < m; ++i) {
         int tmp;
         scanf("%d", &tmp);
         vect[tmp - 1].isviptable = true;
     }
-
     sort(vecc.begin(), vecc.end(), sorta);
     int cnt = 0;
-    while (cnt < num || !qvec.empty()) {
-        bool allfull = true;
-        for (int j = 0; j < k; ++j) {
-            if(vect[j].isempty){
-                if(qvec.empty()){
-                    vect[j].cust = vecc[cnt];
-                    chh = vecc[cnt].hh;
-                    cmm = vecc[cnt].mm;
-                    css = vecc[cnt].ss;
-                    vect[j].hh = chh;
-                    vect[j].mm = cmm;
-                    vect[j].ss = css;
-                    vecc[cnt].waitingtime = 0;
-                    printf("%02d:%02d:%02d %02d:%02d:%02d %d\n", vecc[cnt].hh, vecc[cnt].mm, vecc[cnt].ss, chh, cmm, css, vecc[cnt].waitingtime);
-                    cnt++;
-//                    cout << chh << ":" << cmm << ":" << css << endl;
-                } else{
-                    if(vect[j].isviptable){
-                        int vipnum = -1;
-                        for (int l = 0; l < qvec.size(); ++l) {
-                            if(qvec[l].vip){
-                                vipnum = l;
-                                break;
-                            }
-                        }
-                        if(vipnum != -1){
-                            vect[j].cust = qvec[vipnum];
-                            qvec.erase(qvec.begin() + vipnum);
-                        } else {
-                            vect[j].cust = qvec[0];
-                            qvec.erase(qvec.begin());
-                        }
-                    } else {
-                        vect[j].cust = qvec[0];
-                        qvec.erase(qvec.begin());
-                    }
-                    int waitseconds;
-                    waitseconds = (chh - vect[j].cust.hh) * 3600 + (cmm - vect[j].cust.mm) * 60 + css - vect[j].cust.ss;
-                    if(waitseconds%60){
-                        vect[j].cust.waitingtime = waitseconds/60 + 1;
-                    } else{
-                        vect[j].cust.waitingtime = waitseconds/60;
-                    }
-                    printf("%02d:%02d:%02d %02d:%02d:%02d %d\n", vect[j].cust.hh, vect[j].cust.mm, vect[j].cust.ss, chh, cmm, css, vect[j].cust.waitingtime);
-                }
-                vect[j].servednum++;
-//                cout << cnt << "as" << endl;
-                allfull = false;
-            }
-            vect[j].isempty = false;
-        }
-        if(allfull){
-            int mintime = 21*3600, indexmin = 0;
+    findmintable();
+    while(cnt < vecc.size() || !qvec.empty()){
+        if(qvec.empty()){
             for (int i = 0; i < vect.size(); ++i) {
-                int servetimetmp = vect[i].hh * 3600 + vect[i].mm * 60 + vect[i].ss + vect[i].cust.playingtime * 60;
-                if(servetimetmp < mintime){
-                    mintime = servetimetmp;
-                    indexmin = i;
+                if(vecc[cnt].arrivingtimes > vect[i].finishtime){
+                    vect[i].finishtime = vecc[cnt].arrivingtimes;
                 }
             }
-            if(vect[indexmin].mm + vect[indexmin].cust.playingtime >= 60){
-                vect[indexmin].mm += vect[indexmin].cust.playingtime - 60;
-                vect[indexmin].hh++;
-            } else {
-                vect[indexmin].mm += vect[indexmin].cust.playingtime;
+            findmintable();
+            if(vecc[cnt].vip){
+                if(vipfinishtimemin <= normalfinishtimemin){
+                    vecc[cnt].servetimes = vecc[cnt].arrivingtimes;
+                    if(vecc[cnt].servetimes < 21 *3600){
+                        vecout.push_back(vecc[cnt]);
+                        vect[viptablemin].finishtime = vecc[cnt].arrivingtimes + vecc[cnt].playingtime * 60;
+                        vect[viptablemin].servednum++;
+                    }
+
+
+                } else{
+                    vecc[cnt].servetimes = vecc[cnt].arrivingtimes;
+                    if(vecc[cnt].servetimes < 21 *3600){
+                        vecout.push_back(vecc[cnt]);
+                        vect[normaltablemin].finishtime = vecc[cnt].arrivingtimes + vecc[cnt].playingtime * 60;
+                        vect[normaltablemin].servednum++;
+                    }
+
+                }
+            }else{
+                int tablemin;
+                if(vipfinishtimemin < normalfinishtimemin){
+                    tablemin = viptablemin;
+                } else if(vipfinishtimemin > normalfinishtimemin){
+                    tablemin = normaltablemin;
+                } else{
+                    tablemin = vipfinishtimemin < normalfinishtimemin ? viptablemin : normaltablemin;
+                }
+                vecc[cnt].servetimes = vecc[cnt].arrivingtimes;
+                if(vecc[cnt].servetimes < 21 *3600){
+                    vecout.push_back(vecc[cnt]);
+                    vect[tablemin].finishtime = vecc[cnt].arrivingtimes + vecc[cnt].playingtime * 60;
+                    vect[tablemin].servednum++;
+                }
+
             }
-            chh = vect[indexmin].hh;
-            cmm = vect[indexmin].mm;
-            css = vect[indexmin].ss;
-            while(vecc[cnt].arrivingtimes <= mintime){
-                if(chh < 21)
-                    qvec.push_back(vecc[cnt]);
-//                cout << vecc[cnt].arrivingtimes << " " << mintime << endl;
-//                cout << cnt << endl;
-                cnt++;
-                if(cnt == num)
-                    break;
+            cnt++;
+        } else{
+            if(vipfinishtimemin == normalfinishtimemin){
+                int vipindex = -1;
+                custom customtmp;
+                for (int i = 0; i < qvec.size(); ++i) {
+                    if(qvec[i].vip){
+                        vipindex = i;
+                        customtmp = qvec[vipindex];
+                        qvec.erase(qvec.begin() + vipindex);
+                        break;
+                    }
+                }
+                if(vipindex != -1){
+                    customtmp.servetimes = vect[viptablemin].finishtime;
+                    if(customtmp.servetimes < 21*3600){
+                        vecout.push_back(customtmp);
+                        vect[viptablemin].finishtime += customtmp.playingtime * 60;
+                        vect[viptablemin].servednum++;
+                    }
+
+                } else {
+                    int tablemin;
+                    tablemin = vipfinishtimemin < normalfinishtimemin ? viptablemin : normaltablemin;
+                    customtmp = qvec[0];
+                    qvec.erase(qvec.begin());
+                    customtmp.servetimes = vect[tablemin].finishtime;
+                    if(customtmp.servetimes < 21*3600){
+                        vecout.push_back(customtmp);
+                        vect[tablemin].finishtime += customtmp.playingtime * 60;
+                        vect[tablemin].servednum++;
+                    }
+
+                }
+            } else if(vipfinishtimemin < normalfinishtimemin){
+                int vipindex = -1;
+                custom customtmp;
+                for (int i = 0; i < qvec.size(); ++i) {
+                    if(qvec[i].vip){
+                        vipindex = i;
+                        customtmp = qvec[vipindex];
+                        qvec.erase(qvec.begin() + vipindex);
+                        break;
+                    }
+                }
+                if(vipindex != -1){
+                    customtmp.servetimes = vect[viptablemin].finishtime;
+                    if(customtmp.servetimes < 21*3600){
+                        vecout.push_back(customtmp);
+                        vect[viptablemin].finishtime += customtmp.playingtime * 60;
+                        vect[viptablemin].servednum++;
+                    }
+
+                } else {
+                    customtmp = qvec[0];
+                    qvec.erase(qvec.begin());
+                    customtmp.servetimes = vect[viptablemin].finishtime;
+                    if(customtmp.servetimes < 21*3600){
+                        vecout.push_back(customtmp);
+                        vect[viptablemin].finishtime += customtmp.playingtime * 60;
+                        vect[viptablemin].servednum++;
+                    }
+
+                }
+            } else{
+                custom customtmp;
+                customtmp = qvec[0];
+                qvec.erase(qvec.begin());
+                customtmp.servetimes = vect[normaltablemin].finishtime;
+                if(customtmp.servetimes < 21*3600){
+                    vecout.push_back(customtmp);
+                    vect[normaltablemin].finishtime += customtmp.playingtime * 60;
+                    vect[normaltablemin].servednum++;
+                }
+
             }
-            vect[indexmin].isempty = true;
-//            cout << chh << ":" << cmm << ":" << css << endl;
         }
+        findmintable();
+        for (int i = cnt; i < vecc.size(); ++i) {
+            if(vecc[i].arrivingtimes < min(vipfinishtimemin, normalfinishtimemin)){
+                qvec.push_back(vecc[i]);
+                cnt++;
+            }
+        }
+    }
+    for (int i = 0; i < vecout.size(); ++i) {
+        vecout[i].hhs = vecout[i].servetimes / 3600;
+        vecout[i].mms = vecout[i].servetimes % 3600 / 60;
+        vecout[i].sss = vecout[i].servetimes % 60;
+        vecout[i].waitingtime = (vecout[i].servetimes - vecout[i].arrivingtimes + 30) / 60;
+        printf("%02d:%02d:%02d %02d:%02d:%02d %d\n", vecout[i].hh, vecout[i].mm, vecout[i].ss, vecout[i].hhs, vecout[i].mms, vecout[i].sss, vecout[i].waitingtime);
     }
 
     for (int n = 0; n < vect.size(); ++n) {
@@ -140,10 +214,5 @@ int main() {
         if(n != vect.size() - 1)
             printf(" ");
     }
-
-//    for (int i = 0; i < vecc.size(); ++i) {
-//        cout << vecc[i].hh << ":"  << vecc[i].mm << ":" << vecc[i].ss << " " << vecc[i].vip << endl;
-//    }
-
     return 0;
 }
