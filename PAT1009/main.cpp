@@ -29,8 +29,6 @@ int main() {
         v2.push_back(tmp);
     }
 
-//    cout << v1[1].coef << v2[1].coef << endl;
-
     for (int i = 0; i < v1.size(); ++i) {
         for (int j = 0; j < v2.size(); ++j) {
             res[v1[i].exp + v2[j].exp] += v1[i].coef * v2[j].coef;
