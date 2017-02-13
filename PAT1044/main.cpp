@@ -45,27 +45,51 @@ int sum[100001];
 using namespace std;
 int num, cost;
 int mincost = 100000001;
-void bs(int i){
-    int left = 0, right = i;
-    int mid = (left + right + 1) / 2;
-    while (left <= right){
-        if(sum[right] - sum[left] < cost){
-            left = mid + 1;
+int righttmp;
+vector<vector<int>> vout;
+int bs(int i){
+    int left = i + 1, right = num;
+    int mid;
+    while(left < right){
+        mid = (left + right) / 2;
+        if(sum[mid] - sum[i] >= cost){
+            right = mid;
         } else{
-            right = mid - 1;
+            left = mid + 1;
         }
     }
+    righttmp = right;
+    return sum[right] - sum[i];
 
 };
 int main(){
-    freopen("/home/yyj/ClionProjects/AdvancedPat/PAT1044/in1044a", "r", stdin);
+    freopen("/home/yyj/Code/PAT-AdvancedLevel/PAT1044/in1044", "r", stdin);
     scanf("%d %d\n", &num, &cost);
     for (int i = 0; i < num; ++i) {
         scanf("%d", &sum[i + 1]);
         sum[i + 1] += sum[i];
     }
-    for (int i = 1; i <= num; ++i) {
-        bs(i);
+
+    for (int i = 0; i < num; ++i) {
+        int costtmp = bs(i);
+        if(costtmp < cost){
+            break;
+        }else if(costtmp < mincost){
+            vector<int> vectmp;
+            vectmp.push_back(i+1);
+            vectmp.push_back(righttmp);
+            mincost = costtmp;
+            vout.clear();
+            vout.push_back(vectmp);
+        } else if(costtmp == mincost){
+            vector<int> vectmp;
+            vectmp.push_back(i+1);
+            vectmp.push_back(righttmp);
+            vout.push_back(vectmp);
+        }
+    }
+    for (int i = 0; i < vout.size(); ++i) {
+        printf("%d-%d\n", vout[i][0], vout[i][1]);
     }
     return 0;
 }
