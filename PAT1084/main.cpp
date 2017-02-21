@@ -24,7 +24,6 @@ int main() {
             checked[vecc[i]] = true;
         }
     }
-
     return 0;
 }
 //#include <iostream>
