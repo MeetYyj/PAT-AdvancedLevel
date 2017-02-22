@@ -13,12 +13,12 @@ struct record{
     bool isin;
 };
 
-struct nodetime{
-    int time;
-    int partnum = 0;
-    nodetime *next = NULL;
-    nodetime *pre = NULL;
-};
+//struct nodetime{
+//    int time;
+//    int partnum = 0;
+//    nodetime *next = NULL;
+//    nodetime *pre = NULL;
+//};
 
 struct car{
     int timeall;
@@ -26,7 +26,35 @@ struct car{
 };
 
 map<string, car> map1;
+vector<int> invec;
+vector<int> outvec;
+int binarysearch(int querytime){
+    int lin= 0 , rin = (int)invec.size();
+    int midin;
+    while(lin < rin){
+        midin = (lin + rin) / 2;
+        if(invec[midin] > querytime){
+            rin = midin;
+        } else{
+            lin = midin + 1;
+        }
+    }
 
+    int lout= 0 , rout = (int)outvec.size();
+    int midout;
+    while(lout < rout){
+        midout = (lout + rout) / 2;
+        if(outvec[midout] > querytime){
+            rout = midout;
+        } else{
+            lout = midout + 1;
+        }
+    }
+//    cout << querytime << " " << lin << " " << lout << endl;
+    return lin - lout;
+
+
+}
 bool sort1(const record &a, const record &b){
 //    if(strcmp(a.id, b.id) != 0){
 //        return strcmp(a.id, b.id) < 0;
@@ -63,7 +91,9 @@ int main() {
     int maxpartingtime = 0;
 //    vector<timepoit> partnumv;
     vector<string> maxpartingid;
-    nodetime *startnode = NULL;
+//    nodetime *startnode = NULL;
+
+
     for (; map_it != map1.end(); ++map_it) {
         vector<record> vtmp = map_it->second.recordc;
         sort(vtmp.begin(), vtmp.end(), sort1);
@@ -77,80 +107,82 @@ int main() {
                 tmpout = vtmp[i].time;
                 flgtmp = true;
                 map_it->second.timeall += tmpout - tmpin;
-                if(!startnode){
-                    nodetime *nodes = new nodetime;
-                    nodetime *nodee = new nodetime;
-                    startnode = nodes;
-                    nodes->partnum = 1;
-                    nodes->time = tmpin;
-                    nodes->next = nodee;
-                    nodee->pre = nodes;
-                    nodee->time = tmpout;
-                    nodee->partnum = 0;
-                } else{
-                    nodetime *nodes = new nodetime;
-                    nodetime *nodee = new nodetime;
-                    bool insertflgs = true, insertflge = true;
-                    nodes->time = tmpin;
-                    nodee->time = tmpout;
-                    nodetime *tmpnode;
-                    nodetime *endnode = NULL;
-                    for (tmpnode = startnode; tmpnode; tmpnode = tmpnode->next) {
-                        if(tmpnode->time < nodes->time){
-                            ;
-                        } else if(tmpnode->time == nodes->time){
-                            tmpnode->partnum++;
-                            insertflgs = false;
-                        } else if(tmpnode->time > nodes->time && tmpnode->time < nodee->time){
-                            if(insertflgs){
-                                insertflgs = false;
-                                tmpnode->partnum++;
-                                if(tmpnode == startnode){
-                                    nodes->next = tmpnode;
-                                    tmpnode->pre = nodes;
-                                    startnode = nodes;
-                                    nodes->partnum = 1;
-                                }else{
-                                    tmpnode->pre->next = nodes;
-                                    nodes->pre = tmpnode->pre;
-                                    nodes->next = tmpnode;
-                                    nodes->partnum = nodes->pre->partnum + 1;
-                                    tmpnode->pre = nodes;
-                                }
-                            } else{
-                                tmpnode->partnum++;
-                            }
-                        } else if(tmpnode->time == nodee->time){
-                            insertflge = false;
-                        } else{
-                            if(insertflge) {
-                                insertflge = false;
-                                tmpnode->pre->next = nodee;
-                                nodee->next = tmpnode;
-                                nodee->pre = tmpnode->pre;
-                                if(nodee->pre->partnum - 1 >= 0){
-                                    nodee->partnum = nodee->pre->partnum - 1;
-                                }else{
-                                    nodee->partnum = 0;
-                                }
-                                tmpnode->pre = nodee;
-                            }
-                        }
-                        endnode = tmpnode;
-                    }
-                    if(insertflgs){
-                        endnode->next = nodes;
-                        nodes->pre = endnode;
-                        nodes->partnum = 1;
-                        endnode = nodes;
-                    }
-                    if(insertflge){
-                        endnode->next = nodee;
-                        nodee->pre = endnode;
-                        nodee->partnum = 0;
-                    }
-                }
-
+                invec.push_back(tmpin);
+                outvec.push_back(tmpout);
+//                if(!startnode){
+//                    nodetime *nodes = new nodetime;
+//                    nodetime *nodee = new nodetime;
+//                    startnode = nodes;
+//                    nodes->partnum = 1;
+//                    nodes->time = tmpin;
+//                    nodes->next = nodee;
+//                    nodee->pre = nodes;
+//                    nodee->time = tmpout;
+//                    nodee->partnum = 0;
+//                } else{
+//                    nodetime *nodes = new nodetime;
+//                    nodetime *nodee = new nodetime;
+//                    bool insertflgs = true, insertflge = true;
+//                    nodes->time = tmpin;
+//                    nodee->time = tmpout;
+//                    nodetime *tmpnode;
+//                    nodetime *endnode = NULL;
+//                    for (tmpnode = startnode; tmpnode; tmpnode = tmpnode->next) {
+//                        if(tmpnode->time < nodes->time){
+//                            ;
+//                        } else if(tmpnode->time == nodes->time){
+//                            tmpnode->partnum++;
+//                            insertflgs = false;
+//                        } else if(tmpnode->time > nodes->time && tmpnode->time < nodee->time){
+//                            if(insertflgs){
+//                                insertflgs = false;
+//                                tmpnode->partnum++;
+//                                if(tmpnode == startnode){
+//                                    nodes->next = tmpnode;
+//                                    tmpnode->pre = nodes;
+//                                    startnode = nodes;
+//                                    nodes->partnum = 1;
+//                                }else{
+//                                    tmpnode->pre->next = nodes;
+//                                    nodes->pre = tmpnode->pre;
+//                                    nodes->next = tmpnode;
+//                                    nodes->partnum = nodes->pre->partnum + 1;
+//                                    tmpnode->pre = nodes;
+//                                }
+//                            } else{
+//                                tmpnode->partnum++;
+//                            }
+//                        } else if(tmpnode->time == nodee->time){
+//                            insertflge = false;
+//                        } else{
+//                            if(insertflge) {
+//                                insertflge = false;
+//                                tmpnode->pre->next = nodee;
+//                                nodee->next = tmpnode;
+//                                nodee->pre = tmpnode->pre;
+//                                if(nodee->pre->partnum - 1 >= 0){
+//                                    nodee->partnum = nodee->pre->partnum - 1;
+//                                }else{
+//                                    nodee->partnum = 0;
+//                                }
+//                                tmpnode->pre = nodee;
+//                            }
+//                        }
+//                        endnode = tmpnode;
+//                    }
+//                    if(insertflgs){
+//                        endnode->next = nodes;
+//                        nodes->pre = endnode;
+//                        nodes->partnum = 1;
+//                        endnode = nodes;
+//                    }
+//                    if(insertflge){
+//                        endnode->next = nodee;
+//                        nodee->pre = endnode;
+//                        nodee->partnum = 0;
+//                    }
+//                }
+//---------------------------------
 
 //                int tmpinindex = 0;
 //                int tmpoutindex = 0;
@@ -232,22 +264,35 @@ int main() {
 //        cout << partnumv[i].time << " " << partnumv[i].partnum << endl;
 //    }
 
-
+    sort(invec.begin(), invec.end());
+    sort(outvec.begin(), outvec.end());
+//    for (int i = 0; i < invec.size(); ++i) {
+//        cout << invec[i] << " ";
+//    }
+//    cout << endl;
+//    for (int i = 0; i < outvec.size(); ++i) {
+//        cout << outvec[i] << " ";
+//    }
+//    cout << endl;
     for (int i = 0; i < queries; ++i) {
         int qhh, qmm, qss, qtime;
         scanf("%d:%d:%d", &qhh, &qmm, &qss);
         qtime = qhh * 3600 + qmm * 60 + qss;
-        nodetime *qnode = startnode;
-        for (; qnode; qnode = qnode->next) {
-            if(qtime < qnode->time){
-                break;
-            }
-        }
-        if(!qnode){
-            printf("0\n");
-        }else{
-            printf("%d\n", qnode->pre->partnum);
-        }
+        int partnum = binarysearch(qtime);
+        printf("%d\n", partnum);
+//------------------------------------------------------
+//        nodetime *qnode = startnode;
+//        for (; qnode; qnode = qnode->next) {
+//            if(qtime < qnode->time){
+//                break;
+//            }
+//        }
+//        if(!qnode){
+//            printf("0\n");
+//        }else{
+//            printf("%d\n", qnode->pre->partnum);
+//        }
+//-----------------------------------------------------
 //        int pindex = -1;
 //        for (int j = 0; j < partnumv.size(); ++j) {
 //            if(qtime > partnumv[j].time){
