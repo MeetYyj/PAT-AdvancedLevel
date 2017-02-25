@@ -52,13 +52,22 @@ void dfs(int index){
         tmppath.pop_back();
     }else{
         tmppath.push_back(index);
-        for (int i = 0; i < city; ++i) {
-            if(graph[index][i].len != 0){
-                dfs(i);
-            }
+        for (int i = 0; i < path[index].size(); ++i) {
+            dfs(path[index][i]);
         }
         tmppath.pop_back();
     }
+}
+
+bool sort1(const vector<int> &a, const vector<int> &b){
+    int suma = 0, sumb = 0;
+    for (int i = 0; i < a.size() - 1; ++i) {
+        suma += graph[a[i]][a[i+1]].cost;
+    }
+    for (int i = 0; i < b.size() - 1; ++i) {
+        sumb += graph[b[i]][b[i+1]].cost;
+    }
+    return suma < sumb;
 }
 
 int main() {
@@ -74,11 +83,22 @@ int main() {
     }
     dijkstra();
     dfs(dst);
-    for (int i = 0; i < allpath.size(); ++i) {
-        for (int j = 0; j < allpath[i].size(); ++j) {
-            cout << allpath[i][j] << ' ';
-        }
-        cout << endl;
+    sort(allpath.begin(), allpath.end(), sort1);
+    int sumcost = 0;
+    for (int i = 0; i < allpath[0].size() - 1; ++i) {
+        sumcost += graph[allpath[0][i]][allpath[0][i+1]].cost;
     }
+    for (int i = 0; i < allpath[0].size(); ++i) {
+        printf("%d ", allpath[0][allpath[0].size() - i - 1]);
+    }
+    printf("%d", dist[dst]);
+    printf(" %d", sumcost);
+//    cout << endl;
+//    for (int i = 0; i < allpath.size(); ++i) {
+//        for (int j = 0; j < allpath[i].size(); ++j) {
+//            cout << allpath[i][j] << ' ';
+//        }
+//        cout << endl;
+//    }
     return 0;
 }
